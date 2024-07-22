@@ -19,10 +19,20 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
 
-// API Routes
+// handle get request(hello)
 app.get('/api/message', (req, res) => {
   res.json('Hello from the server!');
 });
+
+// handle submit button post request 
+app.post('/api/submit', (req, res) => {
+  const { value } = req.body;
+
+  // do something with the value
+  console.log('Received value:', value);
+  res.json({ message: `Received value: ${value}` });
+});
+
 
 // Serve static files from the React app
 if (process.env.NODE_ENV === 'production') {
