@@ -3,7 +3,7 @@ import MapComponent from './components/MapComponent';
 import { fetchFlights } from './services/flightService';
 import { haversineDistance } from './utils/distanceUtil';
 
-interface Flight {
+export interface Flight {
   icao24: string;
   callsign: string;
   origin_country: string;
