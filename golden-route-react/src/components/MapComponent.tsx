@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { Flight } from '../App'; 
 
 interface MapComponentProps {
-  onLocationSelect: (location: { lat: number; lng: number }) => void;
+  onLocationSelect: (location: { lat: number; lng: number }, radius: number, speed: number) => void;
   radius: number;
-  flights: { lat: number; lng: number }[];
+  speed: number;
+  flights: Flight[]; // Add this line
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, flights }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, speed }) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [userLocationSet, setUserLocationSet] = useState(false);
   const [lastClickLocation, setLastClickLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [circle, setCircle] = useState<google.maps.Circle | null>(null);
-  const [flightMarkers, setFlightMarkers] = useState<google.maps.Marker[]>([]);
 
   useEffect(() => {
     if (window.google) {
@@ -32,7 +33,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, f
               lat: latLng.lat(),
               lng: latLng.lng(),
             };
-            onLocationSelect(location);
+            onLocationSelect(location, radius, speed);
             console.log('Selected Location:', location);
 
             setLastClickLocation(location);
@@ -52,7 +53,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, f
         };
       }
     }
-  }, [onLocationSelect, lastClickLocation, radius]);
+  }, [onLocationSelect, lastClickLocation, radius, speed]);
 
   useEffect(() => {
     if (map && lastClickLocation && radius > 0) {
@@ -70,27 +71,6 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, f
       setCircle(newCircle);
     }
   }, [map, lastClickLocation, radius]);
-
-  useEffect(() => {
-    if (map) {
-      flightMarkers.forEach(marker => marker.setMap(null));
-
-      const newMarkers = flights.map(flight => new google.maps.Marker({
-        position: new google.maps.LatLng(flight.lat, flight.lng),
-        map: map,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 6,
-          fillColor: '#FFFF00',
-          fillOpacity: 1,
-          strokeColor: '#FFFF00',
-          strokeWeight: 1,
-        },
-      }));
-
-      setFlightMarkers(newMarkers);
-    }
-  }, [map, flights]);
 
   useEffect(() => {
     if (navigator.geolocation && map && !userLocationSet) {
