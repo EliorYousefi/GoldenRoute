@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flight } from '../App'; 
+import {Flight} from '../interfaces/flightInterface'
 
 interface MapComponentProps {
   onLocationSelect: (location: { lat: number; lng: number }, radius: number, speed: number) => void;

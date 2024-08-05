@@ -2,24 +2,7 @@ import React, { useState } from 'react';
 import MapComponent from './components/MapComponent';
 import { fetchFlights } from './services/flightService';
 import { haversineDistance } from './utils/distanceUtil';
-
-export interface Flight {
-  icao24: string;
-  callsign: string;
-  origin_country: string;
-  longitude: number;
-  latitude: number;
-  on_ground: boolean;
-  velocity: number;
-  true_track: number;
-  src: { lat: number; lng: number }; // Source location
-  dest: { lat: number; lng: number }; // Destination location
-  departureTime: number; // Unix timestamp
-  duration: number; // Duration in hours
-  closingTime?: string;
-  elapsedTime?: string;
-  remainingTime?: string;
-}
+import { Flight } from './interfaces/flightInterface';
 
 const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -45,16 +28,11 @@ const App: React.FC = () => {
   
       const flightsWithDetails = flightsInRadius.map((flight) => {
         const distance = haversineDistance(location.lat, location.lng, flight.latitude, flight.longitude);
-        const closingTime = speed > 0 ? distance / speed : Infinity;
-        const now = Math.floor(Date.now() / 1000);
-        const elapsed = now - flight.departureTime;
-        const remainingTime = flight.duration - (elapsed / 3600);
+        const closingTime = speed > 0 ? distance / speed : null; // Change to number or null
     
         return {
           ...flight,
-          closingTime: closingTime.toFixed(2),
-          elapsedTime: (elapsed / 3600).toFixed(2),
-          remainingTime: remainingTime.toFixed(2),
+          closingTime: closingTime, // Keep as number or null
         };
       });
     
@@ -81,10 +59,10 @@ const App: React.FC = () => {
 
       const flightsWithDetails = flightsInRadius.map((flight) => {
         const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-        const closingTime = speed > 0 ? distance / speed : Infinity;
+        const closingTime = speed > 0 ? distance / speed : null;
         return {
           ...flight,
-          closingTime: closingTime.toFixed(2),
+          closingTime: closingTime,
         };
       });
 
@@ -92,34 +70,30 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSpeedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSpeedChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSpeed = Number(event.target.value);
     setSpeed(newSpeed);
 
     if (selectedLocation && radius > 0) {
-      const updateFlights = async () => {
-        const begin = Math.floor(Date.now() / 1000) - 3600;
-        const end = Math.floor(Date.now() / 1000);
+      const begin = Math.floor(Date.now() / 1000) - 3600;
+      const end = Math.floor(Date.now() / 1000);
         
-        const fetchedFlights = await fetchFlights(begin, end);
-        const flightsInRadius = fetchedFlights.filter((flight) => {
-          const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-          return distance <= radius;
-        });
+      const fetchedFlights = await fetchFlights(begin, end);
+      const flightsInRadius = fetchedFlights.filter((flight) => {
+        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
+        return distance <= radius;
+      });
 
-        const flightsWithDetails = flightsInRadius.map((flight) => {
-          const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-          const closingTime = newSpeed > 0 ? distance / newSpeed : Infinity;
-          return {
-            ...flight,
-            closingTime: closingTime.toFixed(2),
-          };
-        });
+      const flightsWithDetails = flightsInRadius.map((flight) => {
+        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
+        const closingTime = newSpeed > 0 ? distance / newSpeed : null;
+        return {
+          ...flight,
+          closingTime: closingTime,
+        };
+      });
 
-        setFlights(flightsWithDetails);
-      };
-
-      updateFlights();
+      setFlights(flightsWithDetails);
     }
   };
 
@@ -151,23 +125,21 @@ const App: React.FC = () => {
       />
       <h2>Flights in Radius:</h2>
       <ul>
-        {flights.map((flight, index) => (
-          <li key={index}>
-            {flight.callsign || 'No Callsign'} - Latitude: {flight.latitude ?? 'N/A'}, Longitude: {flight.longitude ?? 'N/A'}
-            <br />
-            Source: Latitude {flight.src?.lat ?? 'N/A'}, Longitude {flight.src?.lng ?? 'N/A'}
-            <br />
-            Destination: Latitude {flight.dest?.lat ?? 'N/A'}, Longitude {flight.dest?.lng ?? 'N/A'}
-            <br />
-            Flight Duration: {flight.duration ?? 'N/A'} hours
-            <br />
-            Time Passed: {flight.elapsedTime ?? 'N/A'} hours
-            <br />
-            Remaining Time: {flight.remainingTime ?? 'N/A'} hours
-            <br />
-            Closing Time: {flight.closingTime ?? 'N/A'} hours
-          </li>
-        ))}
+      {flights.length > 0 ? (
+        <ul>
+          {flights.map((flight, index) => (
+            <li key={index}>
+              {flight.callsign || 'No Callsign'} - Latitude: {flight.latitude ?? 'N/A'}, Longitude: {flight.longitude ?? 'N/A'}
+              <br />
+              Origin Country: {flight.src ?? 'N/A'}
+              <br />
+              Closing Time: {flight.closingTime !== null ? flight.closingTime.toFixed(2) : 'N/A'} hours
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No flights available within the selected radius and location.</p>
+      )}
       </ul>
     </div>
   );  
