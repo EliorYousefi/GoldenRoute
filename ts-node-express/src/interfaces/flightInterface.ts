@@ -20,9 +20,3 @@ export interface Flight {
   closingTime: number | null; // Adjust type here
   src?: string; // Add optional src property
 }
-
-export  interface FlightBrief {
-  latitude: number;
-  longitude: number;
-  callsign: string;
-}

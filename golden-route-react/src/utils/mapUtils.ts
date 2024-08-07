@@ -1,5 +1,5 @@
 import { fetchFlights } from '../services/flightService';
-import { haversineDistance } from './distanceUtil';
+import { getDistance } from '../services/api';
 
 interface Flight {
     latitude: number;
@@ -24,7 +24,10 @@ export async function initMap(centerLat: number, centerLon: number, radius: numb
 }
 
 async function getFlightsWithinRadius(centerLat: number, centerLon: number, radius: number): Promise<Flight[]> {
-    const flights = await fetchFlights();
+    const begin = Math.floor(Date.now() / 1000) - 3600;
+    const end = Math.floor(Date.now() / 1000);
+
+    const flights = await fetchFlights(begin, end);
     return flights.filter(flight => {
         const distance = haversineDistance(centerLat, centerLon, flight.latitude, flight.longitude);
         return distance <= radius;

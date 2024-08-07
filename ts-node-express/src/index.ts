@@ -1,15 +1,17 @@
-import express, { Express, Request, Response } from "express";
+import express from 'express';
+import planeRoutes from './routes/planeRoute';
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const app: Express = express();
-const port = process.env.PORT || 3000;
+const app = express();
+const port = process.env.PORT;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
-});
+app.use(express.json());
+
+// Use routes
+app.use('/api', planeRoutes);
 
 app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

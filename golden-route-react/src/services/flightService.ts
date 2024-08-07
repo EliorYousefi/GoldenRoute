@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { Flight } from '../interfaces/flightInterface';
+import { Flight, FlightBrief} from '../interfaces/flightInterface';
+import { getDistance } from './api';
 import {FLIGHT_USERNAME, FLIGHT_PASSWORD} from '../KEYS'
 const baseUrl = 'https://opensky-network.org/api';
 
@@ -66,4 +67,41 @@ export async function fetchFlights(begin: number, end: number): Promise<Flight[]
     console.error('Error fetching flights:', error);
     return []; // Return an empty array on error
   }
+}
+
+export const fetchAndProcessFlights = async (begin: number, end: number, location: { lat: number; lng: number }, radius: number, speed: number) => {
+  const fetchedFlights = await fetchFlights(begin, end);
+
+  const flightsWithDistances = await Promise.all(
+    fetchedFlights.map(async (flight) => {
+      const distance = await getDistance(location.lat, location.lng, flight.latitude, flight.longitude);
+      return { flight, distance };
+    })
+  );
+
+  const flightsInRadius = flightsWithDistances.filter(({ distance }) => distance <= radius);
+
+  return flightsInRadius.map(({ flight, distance }) => {
+    const closingTime = speed > 0 ? distance / speed : null;
+    return {
+      ...flight,
+      closingTime,
+    };
+  });
+};
+
+export async function fetchAndFilterFlights(centerLat: number, centerLon: number, radius: number): Promise<FlightBrief[]> {
+  const begin = Math.floor(Date.now() / 1000) - 3600;
+  const end = Math.floor(Date.now() / 1000);
+
+  const flights = await fetchFlights(begin, end);
+
+  return Promise.all(
+    flights.map(async (flight) => {
+      const distance = await getDistance(centerLat, centerLon, flight.latitude, flight.longitude);
+      return { flight, distance };
+    })
+  ).then(flightsWithDistances =>
+    flightsWithDistances.filter(({ distance }) => distance <= radius).map(({ flight }) => flight)
+  );
 }

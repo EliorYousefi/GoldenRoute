@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import MapComponent from './components/MapComponent';
-import { fetchFlights } from './services/flightService';
-import { haversineDistance } from './utils/distanceUtil';
+import { fetchAndProcessFlights } from './services/flightService';
 import { Flight } from './interfaces/flightInterface';
 
 const App: React.FC = () => {
@@ -12,31 +11,12 @@ const App: React.FC = () => {
 
   const handleLocationSelect = async (location: { lat: number; lng: number }, radius: number, speed: number) => {
     setSelectedLocation(location);
-    
+
     if (location && radius > 0) {
       const begin = Math.floor(Date.now() / 1000) - 3600;
       const end = Math.floor(Date.now() / 1000);
-    
-      const fetchedFlights = await fetchFlights(begin, end);
-      console.log('Fetched Flights:', fetchedFlights);
-      const flightsInRadius = fetchedFlights.filter((flight) => {
-        const distance = haversineDistance(location.lat, location.lng, flight.latitude, flight.longitude);
-        return distance <= radius;
-      });
-  
-      console.log('Flights in Radius:', flightsInRadius);
-  
-      const flightsWithDetails = flightsInRadius.map((flight) => {
-        const distance = haversineDistance(location.lat, location.lng, flight.latitude, flight.longitude);
-        const closingTime = speed > 0 ? distance / speed : null; // Change to number or null
-    
-        return {
-          ...flight,
-          closingTime: closingTime, // Keep as number or null
-        };
-      });
-    
-      console.log('Flights with Details:', flightsWithDetails);
+
+      const flightsWithDetails = await fetchAndProcessFlights(begin, end, location, radius, speed);
       setFlights(flightsWithDetails);
     } else {
       setFlights([]);
@@ -50,22 +30,8 @@ const App: React.FC = () => {
     if (selectedLocation && newRadius > 0) {
       const begin = Math.floor(Date.now() / 1000) - 3600;
       const end = Math.floor(Date.now() / 1000);
-      
-      const fetchedFlights = await fetchFlights(begin, end);
-      const flightsInRadius = fetchedFlights.filter((flight) => {
-        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-        return distance <= newRadius;
-      });
 
-      const flightsWithDetails = flightsInRadius.map((flight) => {
-        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-        const closingTime = speed > 0 ? distance / speed : null;
-        return {
-          ...flight,
-          closingTime: closingTime,
-        };
-      });
-
+      const flightsWithDetails = await fetchAndProcessFlights(begin, end, selectedLocation, newRadius, speed);
       setFlights(flightsWithDetails);
     }
   };
@@ -77,22 +43,8 @@ const App: React.FC = () => {
     if (selectedLocation && radius > 0) {
       const begin = Math.floor(Date.now() / 1000) - 3600;
       const end = Math.floor(Date.now() / 1000);
-        
-      const fetchedFlights = await fetchFlights(begin, end);
-      const flightsInRadius = fetchedFlights.filter((flight) => {
-        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-        return distance <= radius;
-      });
 
-      const flightsWithDetails = flightsInRadius.map((flight) => {
-        const distance = haversineDistance(selectedLocation.lat, selectedLocation.lng, flight.latitude, flight.longitude);
-        const closingTime = newSpeed > 0 ? distance / newSpeed : null;
-        return {
-          ...flight,
-          closingTime: closingTime,
-        };
-      });
-
+      const flightsWithDetails = await fetchAndProcessFlights(begin, end, selectedLocation, radius, newSpeed);
       setFlights(flightsWithDetails);
     }
   };
@@ -142,7 +94,7 @@ const App: React.FC = () => {
       )}
       </ul>
     </div>
-  );  
+  );
 };
 
 export default App;
