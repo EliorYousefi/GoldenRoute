@@ -40,3 +40,32 @@
 .read-the-docs {
   color: #888;
 }
+
+.app-container {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.app-header {
+  color: #333;
+}
+
+.app-section {
+  margin-bottom: 20px;
+}
+
+.app-input {
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+.app-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.app-error {
+  color: red;
+}

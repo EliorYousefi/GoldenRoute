@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import MapComponent from './components/MapComponent';
 import { Flight } from './interfaces/flightInterface';
 import { getNearestFlight, calculateClosureTime } from './services/api';
+import './App.css';
+import { GOOGLE_API } from './KEYS';
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -65,52 +68,71 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Choose a Location:</h2>
-      <MapComponent onLocationSelect={handleLocationSelect} radius={radius} speed={speed} />
-      <br />
+    <div className="app-container">
+      <h1 className="app-header">Golden Route - Elior Yousefi</h1>
+      <section className="app-section">
+        <h2>Choose a Location:</h2>
+        <APIProvider apiKey={GOOGLE_API}>
+          <MapComponent onLocationSelect={handleLocationSelect} />
+        </APIProvider>
+      </section>
+
       {selectedLocation && (
-        <div>
+        <section className="app-section">
           <h2>Selected Location:</h2>
-          <p>Latitude: {selectedLocation.lat}</p>
-          <p>Longitude: {selectedLocation.lng}</p>
-        </div>
+          <p><strong>Latitude:</strong> {selectedLocation.lat}</p>
+          <p><strong>Longitude:</strong> {selectedLocation.lng}</p>
+        </section>
       )}
-      <h2>Enter max flight radius:</h2>
-      <input 
-        type="number" 
-        value={radius} 
-        onChange={handleRadiusChange} 
-        placeholder="Enter Max Flight Radius..." 
-      />
-      <h2>Enter speed:</h2>
-      <input 
-        type="number" 
-        value={speed} 
-        onChange={handleSpeedChange} 
-        placeholder="Enter Speed..." 
-      />
-      <h2>Nearest flight in radius:</h2>
-      <ul>
-        {flight ? (
-          <>
-            {flight.callsign || 'No Callsign'} - Latitude: {flight.latitude ?? 'N/A'}, Longitude: {flight.longitude ?? 'N/A'}
-                <br />
-                Origin Country: {flight.origin_country ?? 'N/A'}
-                <br />
-                Closing Time: {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}
-          </>
-        ) : (
-          <p>No flights available within the selected radius and location.</p>
-        )}
-      </ul>
+
+      <section className="app-section">
+        <h2>Enter Max Flight Radius:</h2>
+        <input 
+          type="number" 
+          value={radius} 
+          onChange={handleRadiusChange} 
+          placeholder="Enter Max Flight Radius..." 
+          className="app-input"
+        />
+        <h2>Enter Speed:</h2>
+        <input 
+          type="number" 
+          value={speed} 
+          onChange={handleSpeedChange} 
+          placeholder="Enter Speed..." 
+          className="app-input"
+        />
+      </section>
+
+      <section className="app-section">
+        <h2>Nearest Flight in Radius:</h2>
+        <ul className="app-list">
+          {flight ? (
+            <li>
+              <p><strong>Callsign:</strong> {flight.callsign || 'No Callsign'}</p>
+              <p><strong>Latitude:</strong> {flight.latitude ?? 'N/A'}</p>
+              <p><strong>Longitude:</strong> {flight.longitude ?? 'N/A'}</p>
+              <p><strong>Origin Country:</strong> {flight.origin_country ?? 'N/A'}</p>
+              <p><strong>Closing Time:</strong> {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
+            </li>
+          ) : (
+            <p>No flights available within the selected radius and location.</p>
+          )}
+        </ul>
+      </section>
+
       {closureTime !== null && (
-        <div>
+        <section className="app-section">
           <h2>Closure Time:</h2>
           <p>{speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
-        </div>
+        </section>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {error && (
+        <section className="app-error">
+          <p>{error}</p>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,99 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Map, AdvancedMarker, Pin  } from '@vis.gl/react-google-maps';
+import * as pin from '../assets/uav.png';
 
-interface MapComponentProps {
-  onLocationSelect: (location: { lat: number; lng: number }, radius: number, speed: number) => void;
-  radius: number;
-  speed: number;
+// Define the type for the location
+interface Location {
+  lat: number;
+  lng: number;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, speed }) => {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [userLocationSet, setUserLocationSet] = useState(false);
-  const [lastClickLocation, setLastClickLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [circle, setCircle] = useState<google.maps.Circle | null>(null);
+interface MapComponentProps {
+  onLocationSelect: (location: Location) => void;
+}
 
-  useEffect(() => {
-    if (window.google) {
-      const mapElement = document.getElementById('map');
-      if (mapElement) {
-        const defaultCenter = lastClickLocation || { lat: 0, lng: 0 };
-        const initialMap = new google.maps.Map(mapElement, {
-          center: defaultCenter,
-          zoom: 12,
-        });
+const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect }) => {
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
-        setMap(initialMap);
-
-        const handleMapClick = (event: google.maps.MapMouseEvent) => {
-          const latLng = event.latLng;
-          if (latLng) {
-            const location = {
-              lat: latLng.lat(),
-              lng: latLng.lng(),
-            };
-            onLocationSelect(location, radius, speed);
-            console.log('Selected Location:', location);
-
-            setLastClickLocation(location);
-            initialMap.setCenter(latLng);
-
-            if (circle) {
-              circle.setCenter(latLng);
-              circle.setRadius(radius * 1000);
-            }
-          }
-        };
-
-        google.maps.event.addListener(initialMap, 'click', handleMapClick);
-
-        return () => {
-          google.maps.event.clearListeners(initialMap, 'click');
-        };
-      }
+  const handleMapClick = (event: any) => {
+    // Check if latLng is present and extract the coordinates
+    if (event.detail.latLng) {
+      const lat = event.detail.latLng.lat;
+      const lng = event.detail.latLng.lng;
+      console.log('Selected location:', { lat, lng }); // Debug the selected location
+      const location = { lat, lng };
+      setSelectedLocation(location);
+      onLocationSelect(location); // Pass the selected location to the parent component
+    } else {
+      // Show alert message if latLng is not available
+      alert('Please select the specific location');
     }
-  }, [onLocationSelect, lastClickLocation, radius, speed]);
+  };
 
-  useEffect(() => {
-    if (map && lastClickLocation && radius > 0) {
-      const newCircle = new google.maps.Circle({
-        center: lastClickLocation,
-        radius: radius * 1000,
-        strokeColor: '#FF0000',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: '#FF0000',
-        fillOpacity: 0.35,
-        map: map,
-      });
+  const markerLocation = selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : { lat: 0, lng: 0 }; // Default location
 
-      setCircle(newCircle);
-    }
-  }, [map, lastClickLocation, radius]);
-
-  useEffect(() => {
-    if (navigator.geolocation && map && !userLocationSet) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const userLatLng = new google.maps.LatLng(latitude, longitude);
-
-          if (map) {
-            map.setCenter(userLatLng);
-            map.setZoom(12);
-          }
-
-          setUserLocationSet(true);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
-    } else if (!navigator.geolocation) {
-      console.error('Geolocation not supported');
-    }
-  }, [map, userLocationSet]);
-
-  return <div id="map" style={{ height: '300px', width: '50%' }}></div>;
+  return (
+    <div className="map-container" style={{ height: '300px', width: '100%' }}>
+      <Map
+        style={{ borderRadius: '20px' }}
+        defaultZoom={13}
+        defaultCenter={markerLocation}
+        
+        gestureHandling="greedy"
+        disableDefaultUI
+        onClick={handleMapClick}
+        
+        mapId='c3fc10d89244a2e5'
+      >
+        {selectedLocation && <AdvancedMarker  position={markerLocation}>
+          <img src={pin.default} width={64} height={20} />
+        </AdvancedMarker>}
+      </Map>
+    </div>
+  );
 };
 
 export default MapComponent;
