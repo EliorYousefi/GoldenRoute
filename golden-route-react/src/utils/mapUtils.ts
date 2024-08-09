@@ -1,35 +1,18 @@
-import { fetchFlights } from '../services/flightService';
-import { getDistance } from '../services/api';
-
-interface Flight {
-    latitude: number;
-    longitude: number;
-    callsign: string;
-}
+// import { fetchAndFilterFlights } from '../services/flightService';
 
 export async function initMap(centerLat: number, centerLon: number, radius: number): Promise<void> {
-    const map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
-        center: { lat: centerLat, lng: centerLon },
-        zoom: 10
-    });
+  const map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
+    center: { lat: centerLat, lng: centerLon },
+    zoom: 10
+  });
 
-    const flights = await getFlightsWithinRadius(centerLat, centerLon, radius);
-    flights.forEach(flight => {
-        new google.maps.Marker({
-            position: { lat: flight.latitude, lng: flight.longitude },
-            map: map,
-            title: flight.callsign
-        });
-    });
-}
-
-async function getFlightsWithinRadius(centerLat: number, centerLon: number, radius: number): Promise<Flight[]> {
-    const begin = Math.floor(Date.now() / 1000) - 3600;
-    const end = Math.floor(Date.now() / 1000);
-
-    const flights = await fetchFlights(begin, end);
-    return flights.filter(flight => {
-        const distance = haversineDistance(centerLat, centerLon, flight.latitude, flight.longitude);
-        return distance <= radius;
-    });
+  // const flights = await fetchAndFilterFlights(centerLat, centerLon, radius);
+  
+  // flights.forEach(flight => {
+  //   new google.maps.Marker({
+  //     position: { lat: flight.latitude, lng: flight.longitude },
+  //     map: map,
+  //     title: flight.callsign
+  //   });
+  // });
 }

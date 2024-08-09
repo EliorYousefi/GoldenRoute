@@ -1,31 +1,43 @@
-import { Request, Response } from 'express';
 import { getDistance } from 'geolib';
+import { Flight } from '../interfaces/flightInterface';
 
-export const findNearestPlane = (req: Request, res: Response) => {
-  const { lat1, lon1, lat2, lon2 } = req.query;
-
-  if (!lat1 || !lon1 || !lat2 || !lon2) {
-    return res.status(400).json({ error: 'Missing parameters' });
+export const findNearestPlane = (
+  flights: Flight[],
+  userLocation: { latitude: number; longitude: number }
+): { nearestFlight: Flight | null; distance: number } => {
+  if (!userLocation || !userLocation.latitude || !userLocation.longitude) {
+    throw new Error('Invalid user location');
   }
 
-  // distance is in meters
-  const distance = getDistance(
-    { latitude: parseFloat(lat1 as string), longitude: parseFloat(lon1 as string) },
-    { latitude: parseFloat(lat2 as string), longitude: parseFloat(lon2 as string) }
-  );
-
-  // convert distance to kilometers
-  res.json({ distance: distance / 1000 });
-};
-
-export const calculateClosureTime = (req: Request, res: Response) => {
-  const { distance, speed } = req.query;
-
-  if (!distance || !speed) {
-    return res.status(400).json({ error: 'Missing parameters' });
+  if (flights.length === 0) {
+    return { nearestFlight: null, distance: Infinity };
   }
 
-  const closureTime = parseFloat(distance as string) / parseFloat(speed as string);
+  let nearestFlight: Flight | null = null;
+  let minDistance = Infinity;
 
-  res.json({ closureTime });
+  for (const flight of flights) {
+    if (!flight.latitude || !flight.longitude) {
+      continue; // Skip flights with invalid locations
+    }
+
+    const flightLocation = {
+      latitude: flight.latitude,
+      longitude: flight.longitude,
+    };
+
+    try {
+      const distance = getDistance(userLocation, flightLocation);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestFlight = flight;
+      }
+    } catch (error) {
+      console.error('Error calculating distance for flight:', error);
+      continue; // Skip this flight if there's an error in distance calculation
+    }
+  }
+
+  return { nearestFlight, distance: minDistance / 1000 }; // Convert distance to kilometers
 };

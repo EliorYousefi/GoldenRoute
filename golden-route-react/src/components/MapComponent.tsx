@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {Flight} from '../interfaces/flightInterface'
 
 interface MapComponentProps {
   onLocationSelect: (location: { lat: number; lng: number }, radius: number, speed: number) => void;
   radius: number;
   speed: number;
-  flights: Flight[]; // Add this line
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, radius, speed }) => {

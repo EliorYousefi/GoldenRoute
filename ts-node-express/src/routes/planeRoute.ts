@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { findNearestPlane, calculateClosureTime } from '../controllers/planeController';
+import { handleFindNearestPlane, calculateClosureTime } from '../handlers/routeHandler';
 
 const router = Router();
 
-router.get('/nearest-plane', findNearestPlane);
+router.get('/nearest-flight', handleFindNearestPlane);
 
 router.get('/closure-time', calculateClosureTime);
+
 
 export default router;

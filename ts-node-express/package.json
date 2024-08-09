@@ -11,11 +11,13 @@
   "description": "",
   "dependencies": {
     "axios": "^1.7.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "geolib": "^3.3.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/geolib": "^2.0.23",
     "@types/node": "^22.1.0",

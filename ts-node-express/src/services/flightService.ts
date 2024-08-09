@@ -2,32 +2,22 @@ import axios from 'axios';
 import dotenv from "dotenv";
 import { Flight } from '../interfaces/flightInterface';
 
-const baseUrl = 'https://opensky-network.org/api';
 dotenv.config();
 
-// check if the flight is valid
-function isValidFlight(flight: Flight): flight is Flight {
-  return flight.latitude !== null && flight.longitude !== null;
-}
-
-// fetch flights from the OpenSky Network API
-export async function fetchFlights(begin: number, end: number): Promise<Flight[]> {
+// Fetch flights from the OpenSky Network API
+export const fetchFlights = async (): Promise<Flight[]> => {
   try {
-    // API request with basic authentication
-    const response = await axios.get(`${baseUrl}/states/all`, {
-      params: {
-        begin,
-        end,
-      },
+    const begin = Math.floor(Date.now() / 1000) - 3600;
+    const end = Math.floor(Date.now() / 1000);
+
+    const response = await axios.get(`${process.env.BASE_URL}/states/all`, {
+      params: { begin, end },
       auth: {
         username: process.env.FLIGHT_USERNAME || '',
         password: process.env.FLIGHT_PASSWORD || '',
       },
     });
 
-    console.log(response);
-
-    // map the API response data
     const flights: Flight[] = response.data.states.map((state: any) => ({
       icao24: state[0],
       callsign: state[1] || '',
@@ -50,22 +40,9 @@ export async function fetchFlights(begin: number, end: number): Promise<Flight[]
       closingTime: null, // null by default
     }));
 
-    // filter invalid flights
-    const flightsWithDetails: Flight[] = flights
-      .filter(isValidFlight)
-      .map((flight) => {
-        const src = flight.origin_country;
-
-        return {
-          ...flight,
-          src,
-          closingTime: flight.closingTime !== null ? flight.closingTime : null, // null by default...
-        };
-      });
-
-    return flightsWithDetails;
+    return flights;
   } catch (error) {
     console.error('Error fetching flights:', error);
-    return []; // return an empty array on error
+    throw new Error('Error fetching flights');
   }
-}
+};

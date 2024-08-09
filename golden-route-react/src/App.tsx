@@ -1,58 +1,75 @@
 import React, { useState } from 'react';
 import MapComponent from './components/MapComponent';
-import { fetchAndProcessFlights } from './services/flightService';
 import { Flight } from './interfaces/flightInterface';
+import { getNearestFlight, calculateClosureTime } from './services/api'; // Update the import path as needed
 
 const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
-  const [flights, setFlights] = useState<Flight[]>([]);
+  const [flight, setFlight] = useState<Flight | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [closureTime, setClosureTime] = useState<number | null>(null);
 
   const handleLocationSelect = async (location: { lat: number; lng: number }, radius: number, speed: number) => {
     setSelectedLocation(location);
-
-    if (location && radius > 0) {
-      const begin = Math.floor(Date.now() / 1000) - 3600;
-      const end = Math.floor(Date.now() / 1000);
-
-      const flightsWithDetails = await fetchAndProcessFlights(begin, end, location, radius, speed);
-      setFlights(flightsWithDetails);
-    } else {
-      setFlights([]);
-    }
+    update();
   };
 
   const handleRadiusChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRadius = Number(event.target.value);
     setRadius(newRadius);
-
-    if (selectedLocation && newRadius > 0) {
-      const begin = Math.floor(Date.now() / 1000) - 3600;
-      const end = Math.floor(Date.now() / 1000);
-
-      const flightsWithDetails = await fetchAndProcessFlights(begin, end, selectedLocation, newRadius, speed);
-      setFlights(flightsWithDetails);
-    }
+    update();
   };
 
   const handleSpeedChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSpeed = Number(event.target.value);
     setSpeed(newSpeed);
+    update();
+  };
 
-    if (selectedLocation && radius > 0) {
-      const begin = Math.floor(Date.now() / 1000) - 3600;
-      const end = Math.floor(Date.now() / 1000);
+  const update = async () => {
+    if (selectedLocation && speed > 0 && radius > 1) {
+      try {
+        const result = await getNearestFlight(selectedLocation.lat, selectedLocation.lng);
+        setFlight(result.nearestFlight);
 
-      const flightsWithDetails = await fetchAndProcessFlights(begin, end, selectedLocation, radius, newSpeed);
-      setFlights(flightsWithDetails);
+        // Calculate closure time for the nearest flight
+        if (result.nearestFlight) {
+          const closureTimeResult = await calculateClosureTime(
+            selectedLocation.lat,
+            selectedLocation.lng,
+            result.nearestFlight.latitude,
+            result.nearestFlight.longitude,
+            speed
+          );
+  
+          setClosureTime(closureTimeResult.closureTime); // Ensure closureTime is a number
+        } else {
+          setClosureTime(null);
+        }
+      } catch (error) {
+        setError('Error fetching nearest flight or calculating closure time.');
+        setFlight(null);
+        setClosureTime(null);
+      }
     }
+  };
+
+  // Helper function to format closure time into hours, minutes, and seconds
+  const formatClosureTime = (timeInHours: number) => {
+    const totalMinutes = Math.floor(timeInHours * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const seconds = Math.round((timeInHours * 3600) % 60);
+    
+    return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
   };
 
   return (
     <div>
       <h2>Choose a Location:</h2>
-      <MapComponent onLocationSelect={handleLocationSelect} radius={radius} speed={speed} flights={flights} />
+      <MapComponent onLocationSelect={handleLocationSelect} radius={radius} speed={speed} />
       <br />
       {selectedLocation && (
         <div>
@@ -75,24 +92,27 @@ const App: React.FC = () => {
         onChange={handleSpeedChange} 
         placeholder="Enter Speed..." 
       />
-      <h2>Flights in Radius:</h2>
+      <h2>Nearest flight in radius:</h2>
       <ul>
-      {flights.length > 0 ? (
-        <ul>
-          {flights.map((flight, index) => (
-            <li key={index}>
-              {flight.callsign || 'No Callsign'} - Latitude: {flight.latitude ?? 'N/A'}, Longitude: {flight.longitude ?? 'N/A'}
-              <br />
-              Origin Country: {flight.src ?? 'N/A'}
-              <br />
-              Closing Time: {flight.closingTime !== null ? flight.closingTime.toFixed(2) : 'N/A'} hours
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No flights available within the selected radius and location.</p>
-      )}
+        {flight ? (
+          <>
+            {flight.callsign || 'No Callsign'} - Latitude: {flight.latitude ?? 'N/A'}, Longitude: {flight.longitude ?? 'N/A'}
+                <br />
+                Origin Country: {flight.origin_country ?? 'N/A'}
+                <br />
+                Closing Time: {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}
+          </>
+        ) : (
+          <p>No flights available within the selected radius and location.</p>
+        )}
       </ul>
+      {closureTime !== null && (
+        <div>
+          <h2>Closure Time:</h2>
+          <p>{speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
+        </div>
+      )}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };

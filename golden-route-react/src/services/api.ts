@@ -6,19 +6,18 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-export const getDistance = async (
+export const getNearestFlight = async (
   lat1: number,
   lon1: number,
-  lat2: number,
-  lon2: number
 ) => {
   try {
-    const response = await api.get('/nearest-plane', {
-      params: { lat1, lon1, lat2, lon2 },
+    const response = await api.get('/nearest-flight', {
+      params: { lat1, lon1 },
     });
+
     return response.data;
   } catch (error) {
-    console.error('Error fetching distance:', error);
+    console.error('Error fetching nearest flight:', error);
     throw error;
   }
 };
