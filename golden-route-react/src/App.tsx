@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MapComponent from './components/MapComponent';
 import { Flight } from './interfaces/flightInterface';
-import { getNearestFlight, calculateClosureTime } from './services/api'; // Update the import path as needed
+import { getNearestFlight, calculateClosureTime } from './services/api';
 
 const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -11,7 +11,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [closureTime, setClosureTime] = useState<number | null>(null);
 
-  const handleLocationSelect = async (location: { lat: number; lng: number }, radius: number, speed: number) => {
+  const handleLocationSelect = async (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     update();
   };
@@ -34,7 +34,6 @@ const App: React.FC = () => {
         const result = await getNearestFlight(selectedLocation.lat, selectedLocation.lng);
         setFlight(result.nearestFlight);
 
-        // Calculate closure time for the nearest flight
         if (result.nearestFlight) {
           const closureTimeResult = await calculateClosureTime(
             selectedLocation.lat,
@@ -44,7 +43,7 @@ const App: React.FC = () => {
             speed
           );
   
-          setClosureTime(closureTimeResult.closureTime); // Ensure closureTime is a number
+          setClosureTime(closureTimeResult.closureTime); 
         } else {
           setClosureTime(null);
         }
@@ -56,7 +55,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Helper function to format closure time into hours, minutes, and seconds
   const formatClosureTime = (timeInHours: number) => {
     const totalMinutes = Math.floor(timeInHours * 60);
     const hours = Math.floor(totalMinutes / 60);
