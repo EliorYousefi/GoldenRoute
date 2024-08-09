@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MapComponent from './components/MapComponent';
 import { Flight } from './interfaces/flightInterface';
 import { getNearestFlight, calculateClosureTime } from './services/api';
@@ -13,6 +13,31 @@ const App: React.FC = () => {
   const [flight, setFlight] = useState<Flight | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [closureTime, setClosureTime] = useState<number | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const location = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            setUserLocation(location);
+            setSelectedLocation(location); // Optional: center the map on user location
+          },
+          (error) => {
+            console.error('Error fetching user location:', error);
+          }
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+
+    getUserLocation();
+  }, []); // Only run once on component mount
 
   const handleLocationSelect = async (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
@@ -72,36 +97,48 @@ const App: React.FC = () => {
       <h1 className="app-header">Golden Route - Elior Yousefi</h1>
       <section className="app-section">
         <h2>Choose a Location:</h2>
+        <h3>Ctrl + Mouse Wheel To Zoom In/Out:</h3>
         <APIProvider apiKey={GOOGLE_API}>
-          <MapComponent onLocationSelect={handleLocationSelect} />
+          <MapComponent 
+            onLocationSelect={handleLocationSelect} 
+            userLocation={userLocation}
+            planeLocation={{ lat: flight?.latitude || 0, lng: flight?.longitude || 0}}
+          />
         </APIProvider>
       </section>
 
       {selectedLocation && (
         <section className="app-section">
           <h2>Selected Location:</h2>
-          <p><strong>Latitude:</strong> {selectedLocation.lat}</p>
-          <p><strong>Longitude:</strong> {selectedLocation.lng}</p>
+          <p><strong>Latitude:</strong> {selectedLocation.lat} <strong>Longitude:</strong> {selectedLocation.lng}</p>
         </section>
       )}
 
       <section className="app-section">
-        <h2>Enter Max Flight Radius:</h2>
-        <input 
-          type="number" 
-          value={radius} 
-          onChange={handleRadiusChange} 
-          placeholder="Enter Max Flight Radius..." 
-          className="app-input"
-        />
-        <h2>Enter Speed:</h2>
-        <input 
-          type="number" 
-          value={speed} 
-          onChange={handleSpeedChange} 
-          placeholder="Enter Speed..." 
-          className="app-input"
-        />
+        <div className="input-container">
+          <div className="input-group">
+            <label htmlFor="radius">Enter Max Flight Radius: </label>
+            <input 
+              id="radius"
+              type="number" 
+              value={radius} 
+              onChange={handleRadiusChange} 
+              placeholder="Enter Max Flight Radius..." 
+              className="app-input"
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="speed">Enter Speed: </label>
+            <input 
+              id="speed"
+              type="number" 
+              value={speed} 
+              onChange={handleSpeedChange} 
+              placeholder="Enter Speed..." 
+              className="app-input"
+            />
+          </div>
+        </div>
       </section>
 
       <section className="app-section">
@@ -113,26 +150,18 @@ const App: React.FC = () => {
               <p><strong>Latitude:</strong> {flight.latitude ?? 'N/A'}</p>
               <p><strong>Longitude:</strong> {flight.longitude ?? 'N/A'}</p>
               <p><strong>Origin Country:</strong> {flight.origin_country ?? 'N/A'}</p>
-              <p><strong>Closing Time:</strong> {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
+              <p><strong>Closure Time:</strong> {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
             </li>
           ) : (
             <p>No flights available within the selected radius and location.</p>
           )}
         </ul>
       </section>
-
-      {closureTime !== null && (
-        <section className="app-section">
-          <h2>Closure Time:</h2>
-          <p>{speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
-        </section>
-      )}
-
-      {error && (
+      {/* {error && (
         <section className="app-error">
           <p>{error}</p>
         </section>
-      )}
+      )} */}
     </div>
   );
 };
