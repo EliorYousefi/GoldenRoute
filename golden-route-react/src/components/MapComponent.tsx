@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps'; // cool library
 import * as pin from '../assets/uav.png';
 import * as airplane from '../assets/airplane.png';
 
@@ -24,6 +24,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, userLocat
     setLocalSelectedLocation(selectedLocation); // update local state when location changes
   }, [selectedLocation]);
 
+  // function that will "draw" a circle by radius and location(and num of pins)
   useEffect(() => {
     if (localSelectedLocation && radius != 0) {
       const numberOfPins = 20;
@@ -83,6 +84,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ onLocationSelect, userLocat
             <img src={airplane.default} width={64} height={40} />
           </AdvancedMarker>
         )}
+        {/* circle of pins  */}
         {pinLocations.map((loc, index) => (
           loc.lat !== 0 && loc.lng !== 0 && ( // Ensure valid coordinates
             <AdvancedMarker key={index} position={loc}>

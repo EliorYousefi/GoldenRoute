@@ -37,6 +37,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
 }) => {
   const handleSave = async () => {
     try {
+      // send save request for location
       await api.post('/locations', {
         uavLocation,
         radius,

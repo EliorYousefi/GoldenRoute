@@ -6,6 +6,7 @@ import { getDistance } from 'geolib';
 export const handleFindNearestPlane = async (req: Request, res: Response): Promise<void> => {
   const { lat1, lon1, radius } = req.query;
 
+  // check for params
   if (!lat1 || !lon1 || !radius) {
     res.status(400).json({ error: 'Missing parameters' });
     return; 
@@ -24,13 +25,16 @@ export const handleFindNearestPlane = async (req: Request, res: Response): Promi
   }
 
   try {
+    // get flights from external API
     const flights = await fetchFlights();
     
     if (!Array.isArray(flights)) {
       throw new Error('Invalid flights data');
     }
 
+    // filter flights by radius
     const flightsWithinRadius = flights.filter(flight => {
+      // filter invalid flights
       if (flight.latitude == null || flight.longitude == null) {
         return false;
       }
@@ -78,6 +82,7 @@ export const calculateClosureTime = (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing parameters' });
     }
   
+    // T = D / V
     const closureTime = distance / parseFloat(speed as string);
   
     res.json({ closureTime });

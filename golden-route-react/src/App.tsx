@@ -22,6 +22,7 @@ const App: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
+  // modal handler
   const openModal = () => setModalIsOpen(true);
   const closeModal = () => setModalIsOpen(false);
 
@@ -32,6 +33,8 @@ const App: React.FC = () => {
 
   const handleRadiusChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRadius = Number(event.target.value);
+
+    // max and min radius
     if (newRadius >= 0 && newRadius <= EARTH_RADIUS_KM) {
       setRadius(newRadius);
       if (selectedLocation) {
@@ -44,6 +47,7 @@ const App: React.FC = () => {
 
   const handleSpeedChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSpeed = Number(event.target.value);
+
     if (newSpeed >= 0) {
       setSpeed(newSpeed);
       if (selectedLocation) {
@@ -57,6 +61,7 @@ const App: React.FC = () => {
   const update = async (location: { lat: number; lng: number }, radius: number, speed: number) => {
     if (location && speed > 0 && radius > 0) {
       try {
+        // update by getting nearest flight
         const result = await getNearestFlight(location.lat, location.lng, radius);
         setFlight(result.nearestFlight);
 
@@ -82,6 +87,7 @@ const App: React.FC = () => {
 
   const isSaveButtonDisabled = !selectedLocation || radius === 0 || speed === 0 || !flight;
 
+  // when i import location from db
   const handleImport = (location: any) => {
     setSelectedLocation({ lat: location.uavLocationLat, lng: location.uavLocationLng });
     setRadius(location.radius);

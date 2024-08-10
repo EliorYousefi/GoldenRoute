@@ -7,6 +7,7 @@ interface NearestFlightDetailsProps {
 }
 
 const NearestFlightDetails: React.FC<NearestFlightDetailsProps> = ({ flight, closureTime, speed }) => {
+  // accurate closure time showing
   const formatClosureTime = (timeInHours: number) => {
     const totalMinutes = Math.floor(timeInHours * 60);
     const hours = Math.floor(totalMinutes / 60);

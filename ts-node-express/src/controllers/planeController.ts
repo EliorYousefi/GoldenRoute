@@ -16,6 +16,7 @@ export const findNearestPlane = (
   let nearestFlight: Flight | null = null;
   let minDistance = Infinity;
 
+  // check each valid flight
   for (const flight of flights) {
     if (!flight.latitude || !flight.longitude) {
       continue; // skip flights with invalid locations
@@ -27,8 +28,10 @@ export const findNearestPlane = (
     };
 
     try {
+      // distance in meters... 
       const distance = getDistance(userLocation, flightLocation) / 1000;
       
+      // find the smallest distance
       if (distance < minDistance) {
         minDistance = distance;
         nearestFlight = flight;

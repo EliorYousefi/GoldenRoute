@@ -3,6 +3,7 @@ import { saveLocation, getLocations, importLocation, deleteLocation, deleteAllLo
 
 const router = Router();
 
+// route http routes
 router.post('/locations', saveLocation);
 router.get('/locations', getLocations);
 router.post('/import-location/:id', importLocation);

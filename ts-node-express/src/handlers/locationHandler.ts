@@ -7,6 +7,7 @@ export const saveLocation = async (req: Request, res: Response): Promise<void> =
   const { uavLocation, radius, speed, planeLocation, callsign, origin_country, closureTime } = req.body;
   
   try {
+    // create new location in table
     const location = await prisma.location.create({
       data: {
         uavLocationLat: uavLocation.lat,
@@ -30,6 +31,7 @@ export const saveLocation = async (req: Request, res: Response): Promise<void> =
 
 export const getLocations = async (req: Request, res: Response): Promise<void> => {
   try {
+    // return all locations from table
     const locations = await prisma.location.findMany();
     res.json(locations);
   } catch (error) {
@@ -42,6 +44,7 @@ export const importLocation = async (req: Request, res: Response): Promise<void>
   const { id } = req.params;
 
   try {
+    // find location by id
     const location = await prisma.location.findUnique({
       where: { id: Number(id) },
     });
@@ -61,6 +64,7 @@ export const deleteLocation = async (req: Request, res: Response): Promise<void>
   const { id } = req.params;
 
   try {
+    // delete location by id
     const deletedLocation = await prisma.location.delete({
       where: { id: Number(id) },
     });

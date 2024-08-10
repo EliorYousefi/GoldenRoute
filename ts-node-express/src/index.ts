@@ -9,9 +9,8 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4100; // Default to port 4100 if PORT is not defined
 
-// Enable CORS for all origins (for development)
+// Enable CORS for all origins 
 app.use(cors());
-
 
 app.use(express.json());
 
@@ -28,6 +27,3 @@ app.use('/api', locationRoutes);
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-
-// npx ts-node src/index.ts
-

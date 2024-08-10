@@ -3,8 +3,8 @@ import { handleFindNearestPlane, calculateClosureTime } from '../handlers/routeH
 
 const router = Router();
 
+// route http routes for flights(api)
 router.get('/nearest-flight', handleFindNearestPlane);
-
 router.get('/closure-time', calculateClosureTime);
 
 

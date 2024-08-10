@@ -30,6 +30,7 @@ const DataImportModal: React.FC<{
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    // when open fetch locations
     const fetchLocations = async () => {
       if (isOpen) {
         setLoading(true);
@@ -54,6 +55,7 @@ const DataImportModal: React.FC<{
 
   const handleDelete = async (id: number) => {
     try {
+      // delete by id
       await api.delete(`/locations/${id}`);
       setLocations(locations.filter(location => location.id !== id));
     } catch (error) {
@@ -81,6 +83,7 @@ const DataImportModal: React.FC<{
         <h2 className="Modal__Title">Import Saved Data</h2>
         <button onClick={onRequestClose} className="Modal__CloseButton">Close</button>
       </div>
+      {/* if loading so wait */}
       {loading ? (
         <p>Loading...</p>
       ) : (

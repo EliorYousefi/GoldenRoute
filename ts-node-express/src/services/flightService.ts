@@ -4,12 +4,13 @@ import { Flight } from '../interfaces/flightInterface';
 
 dotenv.config();
 
-// Fetch flights from the OpenSky Network API
+// fetch flights from the OpenSky Network API
 export const fetchFlights = async (): Promise<Flight[]> => {
   try {
     const begin = Math.floor(Date.now() / 1000) - 3600;
     const end = Math.floor(Date.now() / 1000);
 
+    // fetch from api
     const response = await axios.get(`http://opensky-network.org/api/states/all`, {
       params: { begin, end },
       auth: {
@@ -18,6 +19,7 @@ export const fetchFlights = async (): Promise<Flight[]> => {
       },
     });
 
+    // map fetched data
     const flights: Flight[] = response.data.states.map((state: any) => ({
       icao24: state[0],
       callsign: state[1] || '',
