@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import MapComponent from './components/MapComponent';
-import { Flight } from './interfaces/flightInterface';
-import { getNearestFlight, calculateClosureTime } from './services/api';
-import './css/App.css';
-import { GOOGLE_API } from './KEYS';
-import { APIProvider } from "@vis.gl/react-google-maps";
-import SaveButton from './components/SaveButton';
+import React, { useState } from 'react';
+import MapContainer from './components/MapContainer';
+import InputFields from './components/InputFields';
+import LocationDetails from './components/LocationDetails';
+import NearestFlightDetails from './components/NearestFlightDetails';
+import ButtonGroup from './components/ButtonGroup';
+import UserLocation from './components/UserLocation';
 import DataImportModal from './components/DataImportModal';
+import { getNearestFlight, calculateClosureTime } from './services/api';
+import { Flight } from './interfaces/flightInterface';
+import './css/App.css';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const EARTH_RADIUS_KM = 6371;
 
@@ -23,31 +24,6 @@ const App: React.FC = () => {
 
   const openModal = () => setModalIsOpen(true);
   const closeModal = () => setModalIsOpen(false);
-
-  useEffect(() => {
-    const getUserLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const location = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            setUserLocation(location);
-          },
-          (error) => {
-            console.error('Error fetching user location:', error);
-            toast.error('Error fetching user location.');
-          }
-        );
-      } else {
-        console.error('Geolocation is not supported by this browser.');
-        toast.error('Geolocation is not supported by this browser.');
-      }
-    };
-
-    getUserLocation();
-  }, []); 
 
   const handleLocationSelect = async (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
@@ -104,15 +80,6 @@ const App: React.FC = () => {
     }
   };
 
-  const formatClosureTime = (timeInHours: number) => {
-    const totalMinutes = Math.floor(timeInHours * 60);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const seconds = Math.round((timeInHours * 3600) % 60);
-    
-    return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-  };
-
   const isSaveButtonDisabled = !selectedLocation || radius === 0 || speed === 0 || !flight;
 
   const handleImport = (location: any) => {
@@ -147,91 +114,36 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <h1 className="app-header">Golden Route - Elior Yousefi</h1>
-      <section className="app-section">
-        <h2>Choose a Location:</h2>
-        <h3>Ctrl + Mouse Wheel To Zoom In/Out:</h3>
-        <APIProvider apiKey={GOOGLE_API}>
-          <MapComponent 
-            onLocationSelect={handleLocationSelect} 
-            userLocation={userLocation}
-            planeLocation={{ lat: flight?.latitude || 0, lng: flight?.longitude || 0 }}
-            selectedLocation={selectedLocation} 
-            radius={radius}
-          />
-        </APIProvider>
-      </section>
-
-      {selectedLocation && (
-        <section className="app-section">
-          <h2>Selected Location:</h2>
-          <p><strong>Latitude:</strong> {selectedLocation.lat} <strong>Longitude:</strong> {selectedLocation.lng}</p>
-        </section>
-      )}
-
-      <section className="app-section">
-        <div className="input-container">
-          <div className="input-group">
-            <label htmlFor="radius">Enter Max Flight Radius (km): </label>
-            <input 
-              id="radius"
-              type="number" 
-              value={radius} 
-              onChange={handleRadiusChange} 
-              placeholder="Enter Max Flight Radius..." 
-              className="app-input"
-              min="0"
-              max={EARTH_RADIUS_KM}
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="speed">Enter Speed: </label>
-            <input 
-              id="speed"
-              type="number" 
-              value={speed} 
-              onChange={handleSpeedChange} 
-              placeholder="Enter Speed..." 
-              className="app-input"
-              min="0"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="app-section">
-        <h2>Nearest Flight in Radius:</h2>
-        <ul className="app-list">
-          {flight ? (
-            <li>
-              <p><strong>Callsign:</strong> {flight.callsign || 'No Callsign'}</p>
-              <p><strong>Latitude:</strong> {flight.latitude ?? 'N/A'}</p>
-              <p><strong>Longitude:</strong> {flight.longitude ?? 'N/A'}</p>
-              <p><strong>Origin Country:</strong> {flight.origin_country ?? 'N/A'}</p>
-              <p><strong>Closure Time:</strong> {speed !== 0 && closureTime !== null && !isNaN(closureTime) ? formatClosureTime(closureTime) : 'N/A'}</p>
-            </li>
-          ) : (
-            <p>No flights available within the selected radius and location.</p>
-          )}
-        </ul>
-      </section>
-
-      <section className="app-section">
-        <div className="button-group">
-          <SaveButton 
-            uavLocation={selectedLocation || { lat: 0, lng: 0 }} 
-            radius={radius} 
-            speed={speed} 
-            planeLocation={{ lat: flight?.latitude || 0, lng: flight?.longitude || 0 }} 
-            callsign={flight?.callsign || ''} 
-            origin_country={flight?.origin_country || ''} 
-            closureTime={closureTime || null} 
-            disabled={isSaveButtonDisabled}
-          />
-          <button className="app-button" onClick={openModal}>Import Saved Data</button>
-        </div>
-        <DataImportModal isOpen={modalIsOpen} onRequestClose={closeModal} onImport={handleImport} />
-      </section>
-
+      <UserLocation setUserLocation={setUserLocation} />
+      <MapContainer 
+        handleLocationSelect={handleLocationSelect} 
+        userLocation={userLocation}
+        flight={flight}
+        selectedLocation={selectedLocation} 
+        radius={radius}
+      />
+      <LocationDetails selectedLocation={selectedLocation} />
+      <InputFields 
+        radius={radius} 
+        speed={speed} 
+        handleRadiusChange={handleRadiusChange} 
+        handleSpeedChange={handleSpeedChange} 
+      />
+      <NearestFlightDetails 
+        flight={flight} 
+        closureTime={closureTime} 
+        speed={speed} 
+      />
+      <ButtonGroup 
+        isSaveButtonDisabled={isSaveButtonDisabled} 
+        openModal={openModal} 
+        selectedLocation={selectedLocation} 
+        radius={radius} 
+        speed={speed} 
+        flight={flight} 
+        closureTime={closureTime}
+      />
+      <DataImportModal isOpen={modalIsOpen} onRequestClose={closeModal} onImport={handleImport} />
       <ToastContainer />
     </div>
   );

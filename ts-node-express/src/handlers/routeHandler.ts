@@ -30,9 +30,7 @@ export const handleFindNearestPlane = async (req: Request, res: Response): Promi
       throw new Error('Invalid flights data');
     }
 
-    // Filter flights within the specified radius
     const flightsWithinRadius = flights.filter(flight => {
-      // Validate flight coordinates
       if (flight.latitude == null || flight.longitude == null) {
         return false;
       }
@@ -51,7 +49,6 @@ export const handleFindNearestPlane = async (req: Request, res: Response): Promi
       return;
     }
 
-    // Find the nearest flight within the radius
     const { nearestFlight, distance } = findNearestPlane(flightsWithinRadius, userLocation);
 
     if (nearestFlight) {
