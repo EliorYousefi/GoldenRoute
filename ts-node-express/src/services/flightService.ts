@@ -10,11 +10,11 @@ export const fetchFlights = async (): Promise<Flight[]> => {
     const begin = Math.floor(Date.now() / 1000) - 3600;
     const end = Math.floor(Date.now() / 1000);
 
-    const response = await axios.get(`${process.env.BASE_URL}/states/all`, {
+    const response = await axios.get(`http://opensky-network.org/api/states/all`, {
       params: { begin, end },
       auth: {
-        username: process.env.FLIGHT_USERNAME || '',
-        password: process.env.FLIGHT_PASSWORD || '',
+        username: 'EliorY' || '',
+        password: 'Elior2019!' || '',
       },
     });
 

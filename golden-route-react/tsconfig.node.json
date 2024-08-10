@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "noEmit": true
+    "target": "ESNext",                           // Specifies ECMAScript target version
+    "module": "commonjs",                         // CommonJS modules for Node.js
+    "strict": true,                               // Enable all strict type-checking options
+    "esModuleInterop": true,                      // Allow default imports from modules with no default export
+    "skipLibCheck": true,                         // Skip type checking of all declaration files
+    "forceConsistentCasingInFileNames": true,     // Ensure consistent casing in file names
+    "noEmit": true,                               // No output files, just type checking
+    "moduleResolution": "node",                   // Use Node.js module resolution strategy
+    "allowSyntheticDefaultImports": true,         // Allow default imports from modules with no default export
+    "types": ["node", "express", "cors"]          // Include types for Node, Express, and CORS
   },
-  "include": ["vite.config.ts"]
+  "include": ["src/**/*.ts", "vite.config.ts"],   // Include backend source files and Vite config
+  "exclude": ["node_modules"]                     // Exclude the node_modules directory
 }
-

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 const UserLocation: React.FC<{ setUserLocation: (location: { lat: number; lng: number }) => void }> = ({ setUserLocation }) => {

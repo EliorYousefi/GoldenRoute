@@ -1,24 +1,44 @@
-version: '3.4'
+version: '3.8'  # You can use '3.8' or omit the version field for newer Docker Compose
 
 services:
   goldenroutereact:
     image: goldenroutereact
     build:
       context: golden-route-react
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
     ports:
-      - 4000:4000
-      - 4100:4100
-      - 4200:4200
+      - "4000:4000"
+    depends_on:
+      - goldenroutebackend
+
   goldenroutebackend:
-      image: goldenroutebackend
-      build:
-        context: ts-node-express
-        dockerfile: ./Dockerfile
-      environment:
-        NODE_ENV: production
-      ports:
-        - 4100:4100
-        - 4200:4200
+    image: goldenroutebackend
+    build:
+      context: ts-node-express
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/GoldenRoute?schema=public"
+    command: sh -c "npx prisma migrate deploy && npm start"
+    ports:
+      - "4100:4100"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - dbscripts:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: GoldenRoute
+    ports:
+      - "5432:5432"
+
+
+volumes:
+  dbscripts:
