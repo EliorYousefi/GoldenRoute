@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// npx prisma migrate dev --name init 
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@postgres:5432/GoldenRoute?schema=public"
+}
+
+model Location {
+  id                  Int      @id @default(autoincrement())
+  uavLocationLat      Float
+  uavLocationLng      Float
+  radius              Float
+  speed               Float
+  planeLocationLat    Float
+  planeLocationLng    Float
+  callsign            String?
+  origin_country      String?
+  closureTime         Float?   // Assuming closure time is in hours, adjust as needed
+}

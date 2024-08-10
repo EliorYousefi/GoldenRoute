@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  goldenroutereact:
+    image: goldenroutereact
+    build:
+      context: golden-route-react
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 4000:4000
+      - 4100:4100
+      - 4200:4200
+      - 9229:9229
+    command: ["node", "--inspect=0.0.0.0:9229", "index.js"]
