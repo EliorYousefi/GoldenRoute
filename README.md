@@ -64,6 +64,9 @@ Backend API: http://localhost:4100/ (For API access only)
 - Vite: Build tool for the frontend application.
 - PostgreSQL: Relational database used for storing data.
 
+## To Know
+Because of API limitations, some times there will be loads on the OpenSky-Network API and the flights won't fetch on the first update(doesn't happen to often). Please try to update one of the values and it should work. In addition, the site asks for your location to make the default center location of the map to be your location.
+
 ## Troubleshooting
 If you encounter any issues while running the project, consider the following:
 
