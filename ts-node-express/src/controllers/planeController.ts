@@ -18,7 +18,7 @@ export const findNearestPlane = (
 
   for (const flight of flights) {
     if (!flight.latitude || !flight.longitude) {
-      continue; // Skip flights with invalid locations
+      continue; // skip flights with invalid locations
     }
 
     const flightLocation = {
@@ -27,7 +27,7 @@ export const findNearestPlane = (
     };
 
     try {
-      const distance = getDistance(userLocation, flightLocation);
+      const distance = getDistance(userLocation, flightLocation) / 1000;
       
       if (distance < minDistance) {
         minDistance = distance;
@@ -35,9 +35,9 @@ export const findNearestPlane = (
       }
     } catch (error) {
       console.error('Error calculating distance for flight:', error);
-      continue; // Skip this flight if there's an error in distance calculation
+      continue; // skip this flight 
     }
   }
 
-  return { nearestFlight, distance: minDistance / 1000 }; // Convert distance to kilometers
+  return { nearestFlight, distance: minDistance / 1000 }; // convert to kilometers
 };

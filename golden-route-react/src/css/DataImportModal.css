@@ -1,0 +1,89 @@
+.Modal__Content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 700px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  font-family: Arial, sans-serif;
+  }
+  
+  .Modal__Header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .Modal__Title {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  .Modal__CloseButton {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+  
+  .Modal__Actions {
+    margin-bottom: 20px;
+  }
+  
+  .Modal__Actions button {
+    margin-right: 10px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+  
+  .Modal__Actions button.delete-all {
+    background: #f44336;
+  }
+  
+  .Modal__List {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .Modal__ListItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .Modal__ListItemDetails {
+    flex: 1; 
+  }
+  
+  .Modal__ListItemButtons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .Modal__ListItem button {
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .Modal__ListItem button.delete {
+    background: #f44336;
+  }

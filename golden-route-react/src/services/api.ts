@@ -9,10 +9,11 @@ const api = axios.create({
 export const getNearestFlight = async (
   lat1: number,
   lon1: number,
+  radius: number
 ) => {
   try {
     const response = await api.get('/nearest-flight', {
-      params: { lat1, lon1 },
+      params: { lat1, lon1, radius },
     });
 
     return response.data;

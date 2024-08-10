@@ -4,9 +4,9 @@ import { findNearestPlane } from '../controllers/planeController';
 import { getDistance } from 'geolib';
 
 export const handleFindNearestPlane = async (req: Request, res: Response): Promise<void> => {
-  const { lat1, lon1 } = req.query;
+  const { lat1, lon1, radius } = req.query;
 
-  if (!lat1 || !lon1) {
+  if (!lat1 || !lon1 || !radius) {
     res.status(400).json({ error: 'Missing parameters' });
     return; 
   }
@@ -16,6 +16,13 @@ export const handleFindNearestPlane = async (req: Request, res: Response): Promi
     longitude: parseFloat(lon1 as string),
   };
 
+  const maxRadius = parseFloat(radius as string);
+
+  if (isNaN(userLocation.latitude) || isNaN(userLocation.longitude) || isNaN(maxRadius)) {
+    res.status(400).json({ error: 'Invalid parameter values' });
+    return;
+  }
+
   try {
     const flights = await fetchFlights();
     
@@ -23,7 +30,29 @@ export const handleFindNearestPlane = async (req: Request, res: Response): Promi
       throw new Error('Invalid flights data');
     }
 
-    const { nearestFlight, distance } = findNearestPlane(flights, userLocation);
+    // Filter flights within the specified radius
+    const flightsWithinRadius = flights.filter(flight => {
+      // Validate flight coordinates
+      if (flight.latitude == null || flight.longitude == null) {
+        return false;
+      }
+      
+      const flightLocation = {
+        latitude: flight.latitude,
+        longitude: flight.longitude
+      };
+
+      const distance = getDistance(userLocation, flightLocation) / 1000;
+      return distance <= maxRadius;
+    });
+
+    if (flightsWithinRadius.length === 0) {
+      res.status(404).json({ message: 'No flights found within the specified radius' });
+      return;
+    }
+
+    // Find the nearest flight within the radius
+    const { nearestFlight, distance } = findNearestPlane(flightsWithinRadius, userLocation);
 
     if (nearestFlight) {
       res.json({ nearestFlight, distance });
@@ -41,7 +70,7 @@ export const calculateClosureTime = (req: Request, res: Response) => {
     const uavLocation = {latitude: lat1 as string, longitude: lon1 as string};
     const flightLocation = {latitude: lat2 as string, longitude: lon2 as string};
 
-    const distance = getDistance(uavLocation, flightLocation);
+    const distance = getDistance(uavLocation, flightLocation) / 1000;
 
     if(distance == 0)
     {

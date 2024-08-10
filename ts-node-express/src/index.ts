@@ -2,6 +2,7 @@ import express from 'express';
 import planeRoutes from './routes/planeRoute';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import locationRoutes from './routes/locationRoute';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use('/api', (req, res, next) => {
 
 // Use routes
 app.use('/api', planeRoutes);
+app.use('/api', locationRoutes);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

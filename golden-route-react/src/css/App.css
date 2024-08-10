@@ -77,3 +77,33 @@
   height: 300px;
   width: 80%;
 }
+
+.button-group {
+  display: flex;
+  gap: 16px; 
+  justify-content: center; 
+}
+
+.app-button, .save-button {
+  padding: 10px 20px;
+  font-size: 16px; 
+  border: none; 
+  border-radius: 5px;
+  cursor: pointer; 
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.save-button {
+  background-color: #007bff; 
+  color: white;
+}
+
+.app-button {
+  background-color: #28a745;
+  color: white; 
+}
+
+.app-button:hover, .save-button:hover {
+  background-color: #0056b3; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}

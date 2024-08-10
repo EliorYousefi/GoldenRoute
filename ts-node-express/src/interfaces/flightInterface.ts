@@ -17,6 +17,6 @@ export interface Flight {
   spi: boolean;
   position_source: number;
   category: number;
-  closingTime: number | null; // Adjust type here
-  src?: string; // Add optional src property
+  closingTime: number | null; 
+  src?: string; 
 }
