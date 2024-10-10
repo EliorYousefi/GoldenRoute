@@ -1,5 +1,4 @@
 # Golden Route Project
-*PLEASE REFER TO THE END OF THE FILE FOR IMPORTANT PERSONAL MESSAGE* 
 
 ## Project Description
 
